@@ -21,7 +21,7 @@
 - [Use Cases](use-cases/use-cases.md)
 - [Целевая аудитория](target-audience.md)
 - [Метрики](metrics/metrics.md)
-- [C4-диаграммы архитектуры системы](C4/c4.md)
-- [BPMN-диаграммы](bpmn/bpmn.md)
+- [C4-диаграммы архитектуры системы](C4/README.md)
+- [BPMN-диаграммы](bpmn/README.md)
 - [Точки входа в функциональность](entry-points.md)
 
