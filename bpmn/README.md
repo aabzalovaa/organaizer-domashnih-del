@@ -8,7 +8,7 @@
 
 | Процесс | Диаграмма |
 |---------|-----------|
-| Создание задачи | [PNG](create-task.png) |
+| Создание задачи | [PNG](create-new-task.png) |
 | Формирование рекомендаций | [PNG](recommendation-process.png) |
 
 
