@@ -8,7 +8,7 @@
 
 | Процесс | Диаграмма |
 |---------|-----------|
-| Создание задачи | [PNG](create-task.png) • [BPMN](create-task.bpmn) |
-| Формирование рекомендаций | [PNG](recommendation-process.png) • [BPMN](recommendation-process.bpmn) |
+| Создание задачи | [PNG](create-task.png) |
+| Формирование рекомендаций | [PNG](recommendation-process.png) |
 
 
