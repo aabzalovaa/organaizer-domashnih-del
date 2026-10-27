@@ -1,0 +1,577 @@
+openapi: 3.0.0
+
+info:
+  title: API сервис задач (Органайзер домашних дел)
+  version: 1.0.0
+  description: |
+    API сервиса задач мобильного приложения Wildberries, раздел «Органайзер домашних дел».
+
+    Сервис хранит задачи пользователя и управляет ими: создание, просмотр, редактирование,
+    смена статуса и удаление.
+
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/personalprojects-bed/organizer-api/1.0.0
+
+  - url: http://localhost:8080/api/v1/
+    description: Development server
+
+tags:
+  - name: Tasks
+    description: Работа с задачами
+
+  - name: Categories
+    description: Справочник категорий задач
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      summary: Получить список задач
+      description: Получение списка всех задач пользователя.
+      operationId: getAllTasks
+
+      responses:
+        '200':
+          description: Список задач успешно получен.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskListItem'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Tasks
+      summary: Создать новую задачу
+      description: Создает новую задачу пользователя.
+      operationId: createTask
+
+      requestBody:
+        required: true
+        description: Данные новой задачи.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+
+      responses:
+        '201':
+          description: Задача успешно создана.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tasks/{taskId}:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+
+    get:
+      tags:
+        - Tasks
+      summary: Получить задачу по идентификатору
+      description: Возвращает полную информацию о задаче по её идентификатору.
+      operationId: getTaskById
+
+      responses:
+        '200':
+          description: Задача успешно получена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags:
+        - Tasks
+      summary: Изменить параметры задачи
+      description: Обновляет параметры существующей задачи.
+      operationId: updateTask
+
+      requestBody:
+        required: true
+        description: Новые данные задачи.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateRequest'
+
+      responses:
+        '200':
+          description: Задача успешно обновлена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Tasks
+      summary: Удалить задачу
+      description: Удаляет задачу по её идентификатору.
+      operationId: deleteTask
+
+      responses:
+        '204':
+          description: Задача успешно удалена.
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tasks/{taskId}/status:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+
+    patch:
+      tags:
+        - Tasks
+      summary: Изменить статус задачи
+      description: Изменяет статус существующей задачи.
+      operationId: updateTaskStatus
+
+      requestBody:
+        required: true
+        description: Новый статус задачи.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusChangeRequest'
+
+      responses:
+        '200':
+          description: Статус задачи успешно изменён.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Получить список категорий
+      description: |
+        Возвращает справочник категорий задач. Идентификаторы категорий нужны,
+        чтобы создавать и редактировать задачи, а названия показываются пользователю.
+      operationId: getCategories
+
+      responses:
+        '200':
+          description: Список категорий.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+              example:
+                - id: 1
+                  name: Дом и уборка
+                - id: 2
+                  name: Ремонт и обслуживание
+                - id: 3
+                  name: Покупка для дома
+                - id: 4
+                  name: Семья и дети
+                - id: 5
+                  name: Путешествия
+                - id: 6
+                  name: Праздники
+                - id: 7
+                  name: Личные задачи
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT-токен, используемый для авторизации пользователя.
+
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      description: Идентификатор задачи.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1842
+
+  schemas:
+
+    TaskStatus:
+      type: string
+      description: |
+        Статус задачи:
+        * `NEW` - новая
+        * `IN_PROGRESS` - в процессе
+        * `POSTPONED` - отложена
+        * `DONE` - выполнена
+        * `CANCELLED` - отменена
+      enum:
+        - NEW
+        - IN_PROGRESS
+        - POSTPONED
+        - DONE
+        - CANCELLED
+      example: NEW
+
+    TaskPriority:
+      type: string
+      description: |
+        Приоритет задачи:
+        * `HIGH` - высокий
+        * `MEDIUM` - средний
+        * `LOW` - низкий
+      enum:
+        - HIGH
+        - MEDIUM
+        - LOW
+      default: MEDIUM
+      example: MEDIUM
+
+    Recurrence:
+      type: string
+      description: |
+        Как часто повторять задачу:
+        * `NEVER` - никогда (значение по умолчанию)
+        * `DAILY` - каждый день
+        * `WEEKLY` - каждую неделю
+        * `MONTHLY` - каждый месяц
+        * `YEARLY` - каждый год
+      enum:
+        - NEVER
+        - DAILY
+        - WEEKLY
+        - MONTHLY
+        - YEARLY
+      default: NEVER
+      example: NEVER
+
+    Category:
+      type: object
+      description: Категория задачи.
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор категории.
+          example: 1
+
+        name:
+          type: string
+          description: Название категории.
+          example: Дом и уборка
+
+    Reminder:
+      type: object
+      description: Настройки напоминания о задаче.
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: Включено ли напоминание.
+          default: false
+          example: true
+
+        remindAt:
+          type: string
+          format: date-time
+          description: Дата и время отправки напоминания. Поле обязательно, если enabled=true. Значение должно быть больше текущего времени.
+          example: "2026-11-03T09:00:00+03:00"
+
+    TaskCreateRequest:
+      type: object
+      description: Данные для создания задачи.
+      required:
+        - title
+        - categoryId
+        - dueAt
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Название задачи.
+          example: Заменить фильтр для воды
+
+        categoryId:
+          type: integer
+          format: int64
+          description: Идентификатор категории из справочника `GET /categories`.
+          example: 1
+
+        dueAt:
+          type: string
+          format: date-time
+          description: Срок выполнения (дата и время). Не может быть в прошлом.
+          example: "2026-11-03T10:00:00+03:00"
+
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+
+        reminder:
+          $ref: '#/components/schemas/Reminder'
+
+    TaskUpdateRequest:
+      type: object
+      description: Новые параметры задачи. Передаются все поля, статус не меняется.
+      required:
+        - title
+        - categoryId
+        - dueAt
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Заменить фильтр для воды (кухня)
+
+        categoryId:
+          type: integer
+          format: int64
+          example: 1
+
+        dueAt:
+          type: string
+          format: date-time
+          example: "2026-11-05T10:00:00+03:00"
+
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+
+        reminder:
+          $ref: '#/components/schemas/Reminder'
+
+    StatusChangeRequest:
+      type: object
+      description: Новый статус задачи.
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+
+    Task:
+      type: object
+      description: Полная информация о задаче.
+      required:
+        - id
+        - title
+        - category
+        - status
+        - priority
+        - dueAt
+        - recurrence
+        - reminder
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Идентификатор задачи, присваивается сервером.
+          example: 1842
+
+        title:
+          type: string
+          example: Заменить фильтр для воды
+
+        category:
+          $ref: '#/components/schemas/Category'
+
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+
+        dueAt:
+          type: string
+          format: date-time
+          example: "2026-11-03T10:00:00+03:00"
+
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+
+        reminder:
+          $ref: '#/components/schemas/Reminder'
+
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Когда задача создана.
+          example: "2026-10-27T18:30:00+03:00"
+
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Когда задача изменялась в последний раз.
+          example: "2026-10-27T18:30:00+03:00"
+
+    TaskListItem:
+      type: object
+      description: Краткая информация о задаче для списка и календаря.
+      required:
+        - id
+        - title
+        - category
+        - status
+        - priority
+        - dueAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1842
+
+        title:
+          type: string
+          example: Заменить фильтр для воды
+
+        category:
+          $ref: '#/components/schemas/Category'
+
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+
+        dueAt:
+          type: string
+          format: date-time
+          example: "2026-11-03T10:00:00+03:00"
+
+    Error:
+      type: object
+      description: Стандартный формат ошибки API.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Машинный код ошибки.
+
+        message:
+          type: string
+          description: Понятное описание ошибки, которое можно показать пользователю.
+
+        details:
+          type: array
+          description: Дополнительная информация об ошибке (например, ошибки валидации полей).
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Поле, в котором обнаружена ошибка.
+
+              message:
+                type: string
+                description: Описание ошибки для данного поля.
+
+  responses:
+
+    BadRequest:
+      description: Некорректный запрос.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: Заполните обязательные поля.
+
+    Unauthorized:
+      description: Пользователь не авторизован.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: Требуется авторизация.
+
+    NotFound:
+      description: Задача не найдена.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: TASK_NOT_FOUND
+            message: Задача не найдена.
+
+    InternalError:
+      description: Внутренняя ошибка сервера.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: INTERNAL_ERROR
+            message: Произошла внутренняя ошибка сервера.
