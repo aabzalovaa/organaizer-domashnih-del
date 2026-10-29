@@ -33,8 +33,15 @@ paths:
       tags:
         - Tasks
       summary: Получить список задач
-      description: Получение списка всех задач пользователя.
+      description: Возвращает задачи пользователя страницами, отсортированными по сроку выполнения (dueAt), затем по id.
       operationId: getAllTasks
+      parameters: 
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/DueFrom'
+        - $ref: '#/components/parameters/DueTo'
+        - $ref: '#/components/parameters/CategoryIdFilter'
+        - $ref: '#/components/parameters/StatusFilter'
 
       responses:
         '200':
@@ -44,17 +51,28 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TaskListItem'
+                  $ref: '#/components/schemas/TaskPage'
+
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
     post:
       tags:
         - Tasks
       summary: Создать новую задачу
-      description: Создает новую задачу пользователя.
+      description: Создает задачу со статусом NEW. Повторный запрос с тем же Idempotency-Key не создаёт вторую задачу.
       operationId: createTask
+      parameters: 
+        - $ref: '#/components/parameters/IdempotencyKey'
 
       requestBody:
         required: true
@@ -62,7 +80,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskCreateRequest'
+              $ref: '#/components/schemas/TaskInPut'
 
       responses:
         '201':
@@ -73,10 +91,16 @@ paths:
                 $ref: '#/components/schemas/Task'
 
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
   /tasks/{taskId}:
     parameters:
@@ -96,12 +120,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
+        
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
 
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
     put:
       tags:
@@ -116,7 +143,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskUpdateRequest'
+              $ref: '#/components/schemas/TaskInPut'
 
       responses:
         '200':
@@ -125,15 +152,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-
+        
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/ErrorResponse'
+ 
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
 
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
     delete:
       tags:
@@ -146,11 +176,17 @@ paths:
         '204':
           description: Задача успешно удалена.
 
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
   /tasks/{taskId}/status:
     parameters:
@@ -169,21 +205,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatusChangeRequest'
+              $ref: '#/components/schemas/TaskStatusChange'
 
       responses:
         '200':
-          description: Статус задачи успешно изменён.
+          description: Статус задачи успешно изменен.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: '#/components/schemas/TaskStatusChange'
 
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
   /categories:
     get:
@@ -221,10 +263,10 @@ paths:
                   name: Личные задачи
 
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/ErrorResponse'
 
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/ErrorResponse'
 
 components:
   securitySchemes:
@@ -245,48 +287,108 @@ components:
         minimum: 1
       example: 1842
 
+    CategoryIdFilter:
+      name: categoryId
+      in: query
+      required: false
+      description: Только задачи этой категории.
+      schema:
+        $ref: '#/components/schemas/CategoryId'
+
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      description: Только задачи этого статуса
+      schema:
+        $ref: '#/components/schemas/TaskStatus'
+
+    DueFrom:
+      name: dueFrom
+      in: query
+      required: false
+      description: Срок выполнения не раньше этой даты.
+      schema:
+        type: string
+        format: date-time
+
+    DueTo:
+      name: dueTo
+      in: query
+      required: false
+      description: Срок выполнения раньше этой даты.
+      schema:
+        type: string
+        format: date-time
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Максимум задач на странице
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    Cursor:
+      name: cursor 
+      in: query
+      required: false
+      description: Значение nextCursor из предыдущего ответа. Для первой страницы не передаётся.
+      schema:
+        type: string
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true 
+      description: Уникальный ключ операции. Приложение создаёт его один раз на действие пользователя и повторяет при повторной отправке.
+      schema:
+        type: string
+        format: uuid
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+  
+  headers: 
+    IdempotencyReplayed:
+      description: Равен true, если ответ повторен по ранее сохраненному ключу.
+      schema:
+        type: boolean
+ 
+    RetryAfter:
+      description: Через сколько секунд можно повторить запрос.
+      schema:
+        type: integer
+        minimum: 0
+
   schemas:
 
     TaskStatus:
       type: string
-      description: |
-        Статус задачи:
-        * `NEW` - новая
-        * `IN_PROGRESS` - в процессе
-        * `POSTPONED` - отложена
-        * `DONE` - выполнена
-        * `CANCELLED` - отменена
       enum:
         - NEW
         - IN_PROGRESS
         - POSTPONED
         - DONE
         - CANCELLED
-      example: NEW
+    
+    CategoryId:
+      type: integer
+      format: int64
+      minimum: 1
+      example: 1
 
     TaskPriority:
       type: string
-      description: |
-        Приоритет задачи:
-        * `HIGH` - высокий
-        * `MEDIUM` - средний
-        * `LOW` - низкий
       enum:
         - HIGH
         - MEDIUM
         - LOW
       default: MEDIUM
-      example: MEDIUM
 
     Recurrence:
       type: string
-      description: |
-        Как часто повторять задачу:
-        * `NEVER` - никогда (значение по умолчанию)
-        * `DAILY` - каждый день
-        * `WEEKLY` - каждую неделю
-        * `MONTHLY` - каждый месяц
-        * `YEARLY` - каждый год
       enum:
         - NEVER
         - DAILY
@@ -294,7 +396,6 @@ components:
         - MONTHLY
         - YEARLY
       default: NEVER
-      example: NEVER
 
     Category:
       type: object
@@ -304,11 +405,7 @@ components:
         - name
       properties:
         id:
-          type: integer
-          format: int64
-          description: Идентификатор категории.
-          example: 1
-
+          $ref: '#/components/schemas/CategoryId'
         name:
           type: string
           description: Название категории.
@@ -324,17 +421,16 @@ components:
           type: boolean
           description: Включено ли напоминание.
           default: false
-          example: true
 
         remindAt:
           type: string
           format: date-time
-          description: Дата и время отправки напоминания. Поле обязательно, если enabled=true. Значение должно быть больше текущего времени.
+          description: Обязательно, если enabled=true. Должно быть в будущем.
           example: "2026-11-03T09:00:00+03:00"
 
-    TaskCreateRequest:
+    TaskInPut:
       type: object
-      description: Данные для создания задачи.
+      description: Параметры задачи, которые задает пользователь (создание и изменение).
       required:
         - title
         - categoryId
@@ -348,15 +444,12 @@ components:
           example: Заменить фильтр для воды
 
         categoryId:
-          type: integer
-          format: int64
-          description: Идентификатор категории из справочника `GET /categories`.
-          example: 1
+          $ref: '#/components/schemas/CategoryId'
 
         dueAt:
           type: string
           format: date-time
-          description: Срок выполнения (дата и время). Не может быть в прошлом.
+          description: Срок выполнения. Не может быть в прошлом.
           example: "2026-11-03T10:00:00+03:00"
 
         priority:
@@ -367,41 +460,8 @@ components:
 
         reminder:
           $ref: '#/components/schemas/Reminder'
-
-    TaskUpdateRequest:
-      type: object
-      description: Новые параметры задачи. Передаются все поля, статус не меняется.
-      required:
-        - title
-        - categoryId
-        - dueAt
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 200
-          example: Заменить фильтр для воды (кухня)
-
-        categoryId:
-          type: integer
-          format: int64
-          example: 1
-
-        dueAt:
-          type: string
-          format: date-time
-          example: "2026-11-05T10:00:00+03:00"
-
-        priority:
-          $ref: '#/components/schemas/TaskPriority'
-
-        recurrence:
-          $ref: '#/components/schemas/Recurrence'
-
-        reminder:
-          $ref: '#/components/schemas/Reminder'
-
-    StatusChangeRequest:
+      
+    TaskStatusChange:
       type: object
       description: Новый статус задачи.
       required:
@@ -468,43 +528,25 @@ components:
           description: Когда задача изменялась в последний раз.
           example: "2026-10-27T18:30:00+03:00"
 
-    TaskListItem:
+    TaskPage:
       type: object
-      description: Краткая информация о задаче для списка и календаря.
       required:
-        - id
-        - title
-        - category
-        - status
-        - priority
-        - dueAt
+        - items
+        - nextCursor
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 1842
-
-        title:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        nextCursor:
           type: string
-          example: Заменить фильтр для воды
-
-        category:
-          $ref: '#/components/schemas/Category'
-
-        status:
-          $ref: '#/components/schemas/TaskStatus'
-
-        priority:
-          $ref: '#/components/schemas/TaskPriority'
-
-        dueAt:
-          type: string
-          format: date-time
-          example: "2026-11-03T10:00:00+03:00"
+          nullable: true
+          description: Курсор следующей страницы. null, если страница последняя.
+          example: eyJkdWVBdCI6IjIwMjYtMTEtMDNUMTA6MDA6MDArMDM6MDAiLCJpZCI6MTg0Mn0
 
     Error:
       type: object
-      description: Стандартный формат ошибки API.
+      description: Модель ответа, возвращаемая API при возникновении ошибки. Используется для всех ответов с кодами 4xx и 5xx.
       required:
         - code
         - message
@@ -529,49 +571,14 @@ components:
               field:
                 type: string
                 description: Поле, в котором обнаружена ошибка.
-
               message:
                 type: string
-                description: Описание ошибки для данного поля.
+                description: Описание ошибки для указанного поля.
 
   responses:
-
-    BadRequest:
-      description: Некорректный запрос.
+    ErrorResponse:
+      description: Стандартный ответ API при возникновении ошибки.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-          example:
-            code: VALIDATION_ERROR
-            message: Заполните обязательные поля.
-
-    Unauthorized:
-      description: Пользователь не авторизован.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            code: UNAUTHORIZED
-            message: Требуется авторизация.
-
-    NotFound:
-      description: Задача не найдена.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            code: TASK_NOT_FOUND
-            message: Задача не найдена.
-
-    InternalError:
-      description: Внутренняя ошибка сервера.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            code: INTERNAL_ERROR
-            message: Произошла внутренняя ошибка сервера.
