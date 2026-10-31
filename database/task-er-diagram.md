@@ -25,11 +25,17 @@ Table(Task, "Task (Задачи)") {
 
     due_at : TIMESTAMPTZ NOT NULL
 
-    priority : task_priority_enum NOT NULL DEFAULT 'MEDIUM'
+    priority : ENUM(LOW, MEDIUM, HIGH)
+               NOT NULL
+               DEFAULT MEDIUM
 
-    recurrence : recurrence_enum NOT NULL DEFAULT 'NEVER'
+    recurrence : ENUM(NEVER, DAILY, WEEKLY, MONTHLY, YEARLY)
+                 NOT NULL
+                 DEFAULT NEVER
 
-    status : task_status_enum NOT NULL DEFAULT 'NEW'
+    status : ENUM(NEW, DONE, CANCELLED)
+             NOT NULL
+             DEFAULT NEW
 
     created_at : TIMESTAMPTZ NOT NULL DEFAULT NOW()
 
@@ -37,5 +43,6 @@ Table(Task, "Task (Задачи)") {
 }
 
 Category ||--o{ Task : "1:M"
+
 
 @enduml
