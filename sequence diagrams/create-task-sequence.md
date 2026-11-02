@@ -1,3 +1,6 @@
+<img width="958" height="948" alt="image" src="https://github.com/user-attachments/assets/eda028f0-7b15-4227-9648-b3afe40376b7" />
+
+```plantuml
 @startuml
 title "Создание новой задачи POST /tasks/"
 
@@ -101,6 +104,5 @@ deactivate Frontend
 
 end
 
-end
-
 @enduml
+```
