@@ -1,5 +1,9 @@
-@startuml
+<img width="1145" height="696" alt="image" src="https://github.com/user-attachments/assets/a17485fb-44f6-48cc-b44a-7cf98759dd99" />
 
+
+```plantuml
+@startuml
+title "Обновление статуса задачи PATCH /tasks/{taskId}/status"
 actor User
 
 participant "Marketplace Frontend" as Frontend
@@ -8,7 +12,7 @@ participant "API Gateway" as Gateway
 
 participant "Organizer Task Service" as TaskService
 
-database "Organizer DB" as Database
+database "Task DB" as Database
 
 User -> Frontend: Изменить статус задачи
 
@@ -69,3 +73,4 @@ deactivate Frontend
 end
 
 @enduml
+```
