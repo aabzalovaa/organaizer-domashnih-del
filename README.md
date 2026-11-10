@@ -29,19 +29,21 @@
 
 - [C4-диаграммы](C4/README.md)
 - [BPMN-диаграммы](bpmn/README.md)
-- [Диаграммы последовательности](sequence%20diagrams/README.md)
+- [Диаграммы последовательности создания задачи](sequence%20diagrams/create-task-sequence.md)
+- [Диаграммы последовательности изменения статуса задачи](sequence%20diagrams/update-task-status-sequence.md)
 
 ## API
 
-- [OpenAPI-спецификации](api/README.md)
+- [OpenAPI-спецификация](api/openapi.yaml)
 
 ## База данных
 
-- [ER-диаграммы](database/README.md)
+- [ER-диаграмма Task Service](database/task-er-diagram.md)
 
 ## Метрики
 
-- [Продуктовые и бизнес-метрики](metrics/metrics.md)
+- [Метрики продукта](metrics/metrics.md)
+- [Дерево метрик](metrics/metrics-tree.pdf)
 
 ## Дополнительные материалы
 
