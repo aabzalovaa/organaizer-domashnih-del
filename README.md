@@ -14,14 +14,36 @@
 
 На первом этапе продукт не должен приносить прямую выручку. Его ценность заключается в повышении лояльности пользователей и создании дополнительных возможностей для использования других сервисов платформы.
 
-## Документы проекта
+# Структура проекта
+
+## Требования
 
 - [Функциональные требования](requirements/functional-requirements.md)
 - [Нефункциональные требования](requirements/non-functional-requirements.md)
-- [Use Cases](use-cases/use-cases.md)
-- [Целевая аудитория](target-audience.md)
-- [Метрики](metrics/metrics.md)
-- [C4-диаграммы архитектуры системы](C4/README.md)
-- [BPMN-диаграммы](bpmn/README.md)
-- [Точки входа в функциональность](entry-points.md)
 
+## Use Cases
+
+- [Use Cases](use-cases/use-cases.md)
+
+## Архитектура
+
+- [C4-диаграммы](C4/README.md)
+- [BPMN-диаграммы](bpmn/README.md)
+- [Диаграммы последовательности](sequence%20diagrams/README.md)
+
+## API
+
+- [OpenAPI-спецификации](api/README.md)
+
+## База данных
+
+- [ER-диаграммы](database/README.md)
+
+## Метрики
+
+- [Продуктовые и бизнес-метрики](metrics/metrics.md)
+
+## Дополнительные материалы
+
+- [Целевая аудитория](target-audience.md)
+- [Точки входа в функциональность](entry-points.pdf)
