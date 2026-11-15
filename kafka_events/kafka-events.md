@@ -69,33 +69,3 @@
     "newStatus": "CANCELLED"
   }
 }
-
-### Событие: Выполнение задачи (Task Completed)
-
-**Название топика:** `dev.organizer.fact.tasks-completed.1`
-**Описание очереди:** Очередь, в которую отправляется факт завершения задачи. Используется для отмены запланированных пуш-уведомлений.
-
-**Параметры сообщений:**
-
-| Название параметра | Тип | Обязательность | Описание |
-| :--- | :--- | :--- | :--- |
-| `eventId` | UUID | true | Уникальный идентификатор события (для идемпотентности) |
-| `eventType` | string | true | Тип события (всегда `task.completed`) |
-| `occurredAt` | string | true | Дата и время возникновения события (ISO 8601) |
-| `payload.taskId` | UUID | true | Идентификатор задачи |
-| `payload.userId` | UUID | true | ID пользователя |
-| `payload.completedAt` | string | true | Дата и время фактического выполнения задачи пользователем (ISO 8601) |
-
-**Пример сообщения:**
-
-```json
-{
-  "eventId": "a1b2c3d4-7777-8888-9999-000011112222",
-  "eventType": "task.completed",
-  "occurredAt": "2026-08-30T18:00:05Z",
-  "payload": {
-    "taskId": "d171daeb-891c-4c03-a5bf-f88bc2b1ca8a",
-    "userId": "aa19f67d-1d46-4e5d-9ff2-ed9b8c8c9548",
-    "completedAt": "2026-08-30T18:00:00Z"
-  }
-}
