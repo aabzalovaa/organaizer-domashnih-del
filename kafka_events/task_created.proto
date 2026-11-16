@@ -1,7 +1,33 @@
-syntax = "proto3"
+syntax = "proto3";
 
 package organizer.tasks;
 
-message EventEnvelop {
-    string 
+import "google/protobuf/timestamp.proto";
+
+message EventEnvelope {
+    string event_id = 1;
+    string event_type = 2;
+    google.protobuf.Timestamp occurred_at = 3;
+}
+
+message TaskCreatedPayload {
+    string task_id = 1;
+    string user_id = 2;
+    string title = 3;
+    google.protobuf.Timestamp due_at = 4; 
+    int32 category_id = 5;
+    Recurrence recurrence = 6;
+}
+
+enum Recurrence {
+    NEVER = 0;
+    DAILY = 1;
+    WEEKLY = 2;
+    MONTHLY = 3;
+    YEARLY = 4;
+}
+
+message TaskCreatedEvent {
+    EventEnvelope envelope = 1;
+    TaskCreatedPayload payload = 2;
 }
