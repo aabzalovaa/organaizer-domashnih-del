@@ -33,7 +33,7 @@
     "recurrence": "DAILY"
   }
 }
-
+```
 ### Событие: Обновление задачи (Task Updated)
 
 **Название топика:** `dev.organizer.fact.tasks-updated.1`
@@ -69,3 +69,4 @@
     "newStatus": "CANCELLED"
   }
 }
+```
