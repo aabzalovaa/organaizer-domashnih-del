@@ -4,13 +4,40 @@ package organizer.tasks;
 
 import "google/protobuf/timestamp.proto";
 
-message EventEnvelope {
+message Event {
     string event_id = 1;
-    string event_type = 2;
+    EventType event_type = 2;
     google.protobuf.Timestamp occurred_at = 3;
+    oneof task {
+        TaskCreated created = 4;
+        TaskUpdated updated = 5;
+        TaskDeleted deleted = 6;
+    }
 }
 
-message TaskCreatedPayload {
+enum EventType {
+    UNSPECIFIED = 0;
+    CREATED = 1;
+    UPDATED = 2;
+    DELETED = 3;
+} 
+
+message TaskCreated {
+    Task task = 1; 
+}
+
+message TaskUpdated {
+    string task_id = 1;
+    string old_status = 2;
+    string new_status = 3;
+}
+
+message TaskDeleted {
+    string task_id = 1;
+    string user_id = 2;
+}
+
+message Task {
     string task_id = 1;
     string user_id = 2;
     string title = 3;
@@ -25,9 +52,4 @@ enum Recurrence {
     WEEKLY = 2;
     MONTHLY = 3;
     YEARLY = 4;
-}
-
-message TaskCreatedEvent {
-    EventEnvelope envelope = 1;
-    TaskCreatedPayload payload = 2;
 }
